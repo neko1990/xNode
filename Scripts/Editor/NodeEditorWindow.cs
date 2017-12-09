@@ -21,7 +21,6 @@ namespace XNodeEditor {
         private float _zoom = 1;
 
         void OnFocus() {
-            AssetDatabase.SaveAssets();
             current = this;
         }
 

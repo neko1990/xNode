@@ -90,21 +90,17 @@ namespace XNodeEditor {
                             //If connection is valid, save it
                             if (draggedOutputTarget != null) {
                                 XNode.Node node = draggedOutputTarget.node;
+                                Undo.RecordObjects( new UnityEngine.Object[] {draggedOutput.node, draggedOutputTarget.node}, "Port Connection");
                                 if (graph.nodes.Count != 0) draggedOutput.Connect(draggedOutputTarget);
                                 if (NodeEditor.onUpdateNode != null) NodeEditor.onUpdateNode(node);
-                                EditorUtility.SetDirty(graph);
                             }
                             //Release dragged connection
                             draggedOutput = null;
                             draggedOutputTarget = null;
-                            EditorUtility.SetDirty(graph);
                             Repaint();
-                            AssetDatabase.SaveAssets();
                         } else if (IsDraggingNode) {
                             draggedNode = null;
-                            AssetDatabase.SaveAssets();
                         } else if (GUIUtility.hotControl != 0) {
-                            AssetDatabase.SaveAssets();
                         }
                     } else if (e.button == 1) {
                         if (!isPanning) {
@@ -127,8 +123,10 @@ namespace XNodeEditor {
         }
 
         public void CreateNode(Type type, Vector2 position) {
+            Undo.RecordObject(graph, "Create Node");
             XNode.Node node = graph.AddNode(type);
             node.position = position;
+            Undo.RegisterCreatedObjectUndo(node , "Create Node");
             Repaint();
         }
 

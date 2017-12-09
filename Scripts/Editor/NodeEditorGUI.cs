@@ -86,10 +86,17 @@ namespace XNodeEditor {
                 }
             });
             contextMenu.AddItem(new GUIContent("Duplicate"), false, () => {
+                Undo.RecordObject(graph, "Copy Node ");
                 XNode.Node n = graph.CopyNode(node);
+                Undo.RegisterCreatedObjectUndo(node , "Duplicated Node");
                 n.position = node.position + new Vector2(30, 30);
             });
-            contextMenu.AddItem(new GUIContent("Remove"), false, () => graph.RemoveNode(node));
+            contextMenu.AddItem(new GUIContent("Remove"), false, () =>
+            {
+                Undo.RecordObjects(new UnityEngine.Object[] {graph , node} ,"Remove Node");
+                graph.RemoveNode(node);
+                Undo.DestroyObjectImmediate(node);
+            });
 
             AddCustomContextMenuItems(contextMenu, node);
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
@@ -112,6 +119,7 @@ namespace XNodeEditor {
             }
             contextMenu.AddSeparator("");
             contextMenu.AddItem(new GUIContent("Preferences"), false, () => OpenPreferences());
+            contextMenu.AddItem(new GUIContent("Save Graph"), false, () => Save());
             AddCustomContextMenuItems(contextMenu, graph);
             contextMenu.DropDown(new Rect(Event.current.mousePosition, Vector2.zero));
         }
@@ -194,7 +202,7 @@ namespace XNodeEditor {
             //Save guiColor so we can revert it
             Color guiColor = GUI.color;
             for (int n = 0; n < graph.nodes.Count; n++) {
-                while (graph.nodes[n] == null) graph.nodes.RemoveAt(n);
+                while (graph.nodes.Count < n && graph.nodes[n] == null) graph.nodes.RemoveAt(n);
                 if (n >= graph.nodes.Count) return;
                 XNode.Node node = graph.nodes[n];
 
